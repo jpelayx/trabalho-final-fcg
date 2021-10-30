@@ -7,6 +7,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <limits>
 #include <fstream>
 #include <sstream>
@@ -35,16 +36,16 @@
 #define TELA_INICIAL 0
 #define TELA_JOGO   1
 
-GLFWwindow* mainInit(); // inicialização 
-void loadShaders(); 
+GLFWwindow* mainInit(); // inicialização
+void mainLoadShaders();
 void mainLoadObjects(int argc, char* argv[]);
 void mainRender(); // inicialização do loop de renderização
-void mainDrawModels(glm::vec4 &camera_position_c, glm::vec4 &camera_view_vector, glm::vec4 &camera_up_vector);
-void renderText(GLFWwindow* window);
+void mainDrawModels(glm::mat4 &view, glm::mat4 &projection);
+void mainRenderText(GLFWwindow* window);
 
 int main(int argc, char* argv[]){
     GLFWwindow* window = mainInit();
-    loadShaders();
+    mainLoadShaders();
     mainLoadObjects(argc, argv);
 
     float r_init = g_CameraDistance;
@@ -66,7 +67,7 @@ int main(int argc, char* argv[]){
 
     float speed = 1.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
-    
+
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     int game_state = TELA_JOGO;
@@ -115,14 +116,50 @@ int main(int argc, char* argv[]){
             {
                 move += +u_camera * speed * delta_t;
             }
+
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
             // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
             camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + move; // Ponto "c", centro da câmera
             camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
-            mainDrawModels(camera_position_c, camera_view_vector, camera_up_vector);
+
+            // Computamos a matriz "View" utilizando os parâmetros da câmera para
+            // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+            glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
+
+            // Agora computamos a matriz de Projeção.
+            glm::mat4 projection;
+
+            // Note que, no sistema de coordenadas da câmera, os planos near e far
+            // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
+            float nearplane = -0.1f;  // Posição do "near plane"
+            float farplane  = -10.0f; // Posição do "far plane"
+
+            if (g_UsePerspectiveProjection)
+            {
+                // Projeção Perspectiva.
+                // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
+                float field_of_view = 3.141592 / 3.0f;
+                projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
+            }
+            else
+            {
+                // Projeção Ortográfica.
+                // Para definição dos valores l, r, b, t ("left", "right", "bottom", "top"),
+                // PARA PROJEÇÃO ORTOGRÁFICA veja slides 219-224 do documento Aula_09_Projecoes.pdf.
+                // Para simular um "zoom" ortográfico, computamos o valor de "t"
+                // utilizando a variável g_CameraDistance.
+                float t = 1.5f*g_CameraDistance/2.5f;
+                float b = -t;
+                float r = t*g_ScreenRatio;
+                float l = -r;
+                projection = Matrix_Orthographic(l, r, b, t, nearplane, farplane);
+            }
+
+
+            mainDrawModels(view, projection);
         }
-        renderText(window);
+        mainRenderText(window);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -134,7 +171,7 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void renderText(GLFWwindow* window) {
+void mainRenderText(GLFWwindow* window) {
     // Imprimimos na tela os ângulos de Euler que controlam a rotação do
     // terceiro cubo.
     TextRendering_ShowEulerAngles(window);
@@ -147,41 +184,7 @@ void renderText(GLFWwindow* window) {
     TextRendering_ShowFramesPerSecond(window);
 }
 
-void mainDrawModels(glm::vec4 &camera_position_c, glm::vec4 &camera_view_vector, glm::vec4 &camera_up_vector) {
-    
-        // Computamos a matriz "View" utilizando os parâmetros da câmera para
-        // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
-
-        // Agora computamos a matriz de Projeção.
-        glm::mat4 projection;
-
-        // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
-        float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
-
-        if (g_UsePerspectiveProjection)
-        {
-            // Projeção Perspectiva.
-            // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf.
-            float field_of_view = 3.141592 / 3.0f;
-            projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
-        }
-        else
-        {
-            // Projeção Ortográfica.
-            // Para definição dos valores l, r, b, t ("left", "right", "bottom", "top"),
-            // PARA PROJEÇÃO ORTOGRÁFICA veja slides 219-224 do documento Aula_09_Projecoes.pdf.
-            // Para simular um "zoom" ortográfico, computamos o valor de "t"
-            // utilizando a variável g_CameraDistance.
-            float t = 1.5f*g_CameraDistance/2.5f;
-            float b = -t;
-            float r = t*g_ScreenRatio;
-            float l = -r;
-            projection = Matrix_Orthographic(l, r, b, t, nearplane, farplane);
-        }
-
+void mainDrawModels(glm::mat4 &view, glm::mat4 &projection) {
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
 
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
@@ -211,7 +214,7 @@ void mainDrawModels(glm::vec4 &camera_position_c, glm::vec4 &camera_view_vector,
         DrawVirtualObject("bunny");
 
         // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.1f,0.0f) 
+        model = Matrix_Translate(0.0f,-1.1f,0.0f)
               * Matrix_Scale(50.0f, 50.0f, 50.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
@@ -270,7 +273,7 @@ void mainLoadObjects(int argc, char* argv[]) {
     glFrontFace(GL_CCW);
 }
 
-void main_load_shaders() {
+void mainLoadShaders() {
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
     // para renderização. Veja slides 176-196 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
@@ -347,6 +350,6 @@ GLFWwindow* mainInit() {
     const GLubyte *glslversion = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
-    
+
     return window;
 }
