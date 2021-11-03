@@ -508,6 +508,7 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
         theobject.bbox_max = bbox_max;
 
         g_VirtualScene[model->shapes[shape].name] = theobject;
+        std::cout << model->shapes[shape].name << std::endl;
     }
 
     GLuint VBO_model_coefficients_id;
