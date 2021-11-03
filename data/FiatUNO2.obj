@@ -1,7 +1,7 @@
 # Blender v2.79 (sub 0) OBJ File: 'FiatUNO.blend'
 # www.blender.org
 mtllib FiatUNO.mtl
-g glock
+g car
 v 0.363363 0.796468 -2.210557
 v 0.365661 0.928684 -2.226754
 v 0.001314 0.932944 -2.226234
