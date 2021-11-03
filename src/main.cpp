@@ -324,9 +324,8 @@ int main(int argc, char* argv[])
     glm::vec4 camera_view_vector; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector; // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
-    float speed = 1.0f; // Velocidade da câmera
+    float speed = 3.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
-
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -375,20 +374,20 @@ int main(int argc, char* argv[])
             move += -w_camera * speed * delta_t;
         }
         // A
-        if (g_A_state)
-        {
-            move += -u_camera * speed * delta_t;
-        }
+        // if (g_A_state)
+        // {
+        //     move += -u_camera * speed * delta_t;
+        // }
         // S
         if (g_S_state)
         {
             move += +w_camera * speed * delta_t;
         }
         // D
-        if (g_D_state)
-        {
-            move += +u_camera * speed * delta_t;
-        }
+        // if (g_D_state)
+        // {
+        //     move += +u_camera * speed * delta_t;
+        // }
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -451,9 +450,11 @@ int main(int argc, char* argv[])
         DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f)
-              * Matrix_Scale(0.10f, 0.10f, 0.10f)
-              * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
+        model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
+              * Matrix_Rotate_X(0.0f)
+              * Matrix_Rotate_Y(g_CameraTheta + M_PI)
+              * Matrix_Rotate_Z(0.0f)
+              * Matrix_Scale(0.10f, 0.10f, 0.10f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("car");
