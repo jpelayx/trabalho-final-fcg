@@ -123,7 +123,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 // funcoes de colisao
 bool collisionCubeCube(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
-bool collisionCubeSphere(glm::vec3 bbcubemin, glm::vec3 bbcubemax, glm::vec3 bbspheremin, glm::vec3 bbspheremax);
+bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax);
 bool collisionSphereSphere(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
@@ -332,6 +332,7 @@ int main(int argc, char* argv[])
     glm::vec4 camera_position_c; // Ponto "c", centro da câmera
     glm::vec4 camera_view_vector; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector; // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+    glm::vec4 old_move = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // vetor que representa o deslocamento da posicao inicial
 
     float speed = 3.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
@@ -382,21 +383,11 @@ int main(int argc, char* argv[])
         {
             move += -w_camera * speed * delta_t;
         }
-        // A
-        // if (g_A_state)
-        // {
-        //     move += -u_camera * speed * delta_t;
-        // }
         // S
         if (g_S_state)
         {
             move += +w_camera * speed * delta_t;
         }
-        // D
-        // if (g_D_state)
-        // {
-        //     move += +u_camera * speed * delta_t;
-        // }
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -448,7 +439,16 @@ int main(int argc, char* argv[])
         #define SPHERE 0
         #define BUNNY  1
         #define PLANE  2
+        #define CAR 3
 
+        bool collision = false;
+
+        glm::mat4 car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
+                            * Matrix_Rotate_X(0.0f)
+                            * Matrix_Rotate_Y(g_CameraTheta + 3.1415f)
+                            * Matrix_Rotate_Z(0.0f)
+                            * Matrix_Scale(0.10f, 0.10f, 0.10f);
+        
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f,0.0f,0.0f)
               * Matrix_Rotate_Z(0.6f)
@@ -458,14 +458,40 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
-              * Matrix_Rotate_X(0.0f)
-              * Matrix_Rotate_Y(g_CameraTheta + 3.1415f)
-              * Matrix_Rotate_Z(0.0f)
-              * Matrix_Scale(0.10f, 0.10f, 0.10f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
+        collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x, 
+                                                            g_VirtualScene["car"].bbox_min.y,
+                                                               g_VirtualScene["car"].bbox_min.z,
+                                                               1.0f), 
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x, 
+                                                               g_VirtualScene["car"].bbox_max.y,
+                                                               g_VirtualScene["car"].bbox_max.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x, 
+                                                               g_VirtualScene["sphere"].bbox_min.y,
+                                                               g_VirtualScene["sphere"].bbox_min.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x, 
+                                                               g_VirtualScene["sphere"].bbox_max.y,
+                                                               g_VirtualScene["sphere"].bbox_max.z,
+                                                               1.0f));
+        std::cout << collision << std::endl;
+
+        // Desenhamos o modelo do carro
+        
+        if(collision)
+        {
+            camera_position_c = camera_position_c - move + old_move;
+            move = old_move;
+
+            car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
+                        * Matrix_Rotate_X(0.0f)
+                        * Matrix_Rotate_Y(g_CameraTheta + 3.1415f)
+                        * Matrix_Rotate_Z(0.0f)
+                        * Matrix_Scale(0.10f, 0.10f, 0.10f);
+        }
+
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(car_model));
+        glUniform1i(object_id_uniform, CAR);
         DrawVirtualObject("car");
 
         // Desenhamos o plano do chão
@@ -474,6 +500,9 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
+
+        
+        old_move = move;
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
