@@ -47,6 +47,7 @@
 #include "utils.h"
 #include "matrices.h"
 #include "collisions.cpp"
+#include "bezier.cpp"
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -126,6 +127,9 @@ bool collisionCubeCube(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm
 bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax);
 bool collisionSphereSphere(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
 
+// curvas de bezier
+glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4);
+
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
 struct SceneObject
@@ -171,6 +175,8 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
+
+float g_oldCameraTheta = g_CameraTheta;
 
 // Variáveis que controlam rotação do antebraço
 float g_ForearmAngleZ = 0.0f;
@@ -450,7 +456,9 @@ int main(int argc, char* argv[])
                             * Matrix_Scale(0.10f, 0.10f, 0.10f);
         
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f)
+        // vec3(sphere_position)
+        glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(-1, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-5, 0, 10), glm::vec3(-10, 0, 5) );
+        model = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
@@ -482,6 +490,7 @@ int main(int argc, char* argv[])
         {
             camera_position_c = camera_position_c - move + old_move;
             move = old_move;
+            g_CameraTheta = g_oldCameraTheta;
 
             car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                         * Matrix_Rotate_X(0.0f)
@@ -503,6 +512,7 @@ int main(int argc, char* argv[])
 
         
         old_move = move;
+        g_oldCameraTheta = g_CameraTheta;
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
