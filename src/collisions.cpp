@@ -2,11 +2,16 @@
 #include <cmath>
 #include <iostream>
 
+using namespace std;
+
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
 bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
-    bool colx = bb1min.x <= bb2max.x && bb1max.x >= bb2min.x;
-    bool coly = bb1min.y <= bb2max.y && bb1max.y >= bb2min.y;
-    bool colz = bb1min.z <= bb2max.z && bb1max.z >= bb2min.z;
+    // std::cout << " bb1min " <<bb1min.x <<" " << bb1min.y << " " << bb1min.z << " bb1max " << bb1max.x << " " << bb1max.y << " " << bb1max.z << std::endl;
+    // std::cout << " bb2min " <<bb2min.x <<" " << bb2min.y << " " << bb2min.z << " bb2max " << bb2max.x << " " << bb2max.y << " " << bb2max.z << std::endl;
+    bool colx = min(bb1min.x, bb1max.x) <= max(bb2min.x, bb2max.x) && max(bb1min.x, bb1max.x) >= min(bb2min.x, bb2max.x);
+    bool coly = min(bb1min.y, bb1max.y) <= max(bb2min.y, bb2max.y) && max(bb1min.y, bb1max.y) >= min(bb2min.y, bb2max.y);
+    bool colz = min(bb1min.z, bb1max.z) <= max(bb2min.z, bb2max.z) && max(bb1min.z, bb1max.z) >= min(bb2min.z, bb2max.z);
+    // std::cout << "COLISAO" << (colx && coly && colz) << std::endl;
     return colx && coly && colz;
 }
 

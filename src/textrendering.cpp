@@ -304,3 +304,13 @@ void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M,
     snprintf(buffer, 90, "[%+0.2f %+0.2f %+0.2f %+0.2f][%+0.2f]     [%+0.2f]        [%+0.2f]\n", M[0][3], M[1][3], M[2][3], M[3][3], v[3], r[3], r[3]/w);
     TextRendering_PrintString(window, buffer, x, y - 3*lineheight, scale);
 }
+
+
+void TextRendering_PrintLives(GLFWwindow* window, int lives, float scale = 1.0f)
+{
+    char buffer[30];
+    float lineheight = TextRendering_LineHeight(window) * scale;
+
+    snprintf(buffer, 10, "LIVES %d/3", lives);
+    TextRendering_PrintString(window, buffer, -0.9f, 0.9f, scale);
+}

@@ -113,6 +113,9 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window);
 void TextRendering_ShowProjection(GLFWwindow* window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 
+// texto customizado
+void TextRendering_PrintLives(GLFWwindow* window, int lives, float scale = 1.0f);
+
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -343,9 +346,12 @@ int main(int argc, char* argv[])
     float speed = 3.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
 
+    int lives = 3;
+
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        std::cout << "VIDAS " << lives << std::endl;
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -456,7 +462,7 @@ int main(int argc, char* argv[])
                             * Matrix_Scale(0.10f, 0.10f, 0.10f);
         
         // Desenhamos o modelo da esfera
-        glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(-1, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-5, 0, 10), glm::vec3(-10, 0, 5) );
+        glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(-1+10, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-5, 0, 10), glm::vec3(-10+10, 0, 5) );
         model = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
@@ -482,7 +488,7 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
 
-        bz = bezier(current_time, 10.0, glm::vec3(-1 + 2, 1, 2), glm::vec3(-1.5 + 2, 1, 15), glm::vec3(-5 + 2, 1, 10), glm::vec3(-10 + 20, 1, 5) );
+        bz = bezier(current_time, 10.0, glm::vec3(-1 + 2+10, 1, 2), glm::vec3(-1.5 + 2, 1, 15), glm::vec3(-5 + 2, 1, 10), glm::vec3(-10 + 10, 1, 5) );
         model = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Scale(2.0f, 2.0f, 2.0f)
               * Matrix_Rotate_Z(0.6f)
@@ -534,13 +540,21 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["plane"].bbox_max.z,
                                                                1.0f));
 
-        std::cout << collision << std::endl;
+        //std::cout << collision << std::endl;
 
         if(collision)
         {
-            camera_position_c = camera_position_c - move + old_move;
-            move = old_move;
-            g_CameraTheta = g_oldCameraTheta;
+            lives -= 1;
+            if (lives < 0)
+                lives = 3;
+                
+            //camera_position_c = camera_position_c - move + old_move;
+            //move = old_move;
+            //g_CameraTheta = g_oldCameraTheta;
+
+            camera_position_c = camera_position_c - move;
+            move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+            g_CameraTheta = 0.0f;
 
             car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                         * Matrix_Rotate_X(0.0f)
@@ -565,6 +579,8 @@ int main(int argc, char* argv[])
         
         old_move = move;
         g_oldCameraTheta = g_CameraTheta;
+
+        TextRendering_PrintLives(window, lives);
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
