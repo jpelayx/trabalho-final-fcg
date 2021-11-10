@@ -337,7 +337,7 @@ int main(int argc, char* argv[])
     glm::mat4 the_view;
 
     // vars da camera
-    glm::vec4 move; // vetor que representa o deslocamento da posicao inicial
+    glm::vec4 move = glm::vec4(0.0f,0.0f,0.0f,0.0f); // vetor que representa o deslocamento da posicao inicial
     glm::vec4 camera_position_c; // Ponto "c", centro da câmera
     glm::vec4 camera_view_vector; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector; // Vetor "up" fixado para apontar para o "céu" (eito Y global)

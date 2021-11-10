@@ -22,9 +22,9 @@ bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbs
     float radius = (sqrt((bbspheremin.x - sphereCenter.x) * (bbspheremin.x-sphereCenter.x) +
                          (bbspheremin.y - sphereCenter.y) * (bbspheremin.y-sphereCenter.y) +
                          (bbspheremin.z - sphereCenter.z) * (bbspheremin.z-sphereCenter.z)))/1.7320;
-    float x = (abs(bbcubemin.x - sphereCenter.x) < abs(bbcubemax.x - sphereCenter.x))? bbcubemin.x: bbcubemax.x;
-    float y = (abs(bbcubemin.y - sphereCenter.y) < abs(bbcubemax.y - sphereCenter.y))? bbcubemin.y: bbcubemax.y;
-    float z = (abs(bbcubemin.z - sphereCenter.z) < abs(bbcubemax.z - sphereCenter.z))? bbcubemin.z: bbcubemax.z;
+    float x = (fabs(bbcubemin.x - sphereCenter.x) < fabs(bbcubemax.x - sphereCenter.x))? bbcubemin.x: bbcubemax.x;
+    float y = (fabs(bbcubemin.y - sphereCenter.y) < fabs(bbcubemax.y - sphereCenter.y))? bbcubemin.y: bbcubemax.y;
+    float z = (fabs(bbcubemin.z - sphereCenter.z) < fabs(bbcubemax.z - sphereCenter.z))? bbcubemin.z: bbcubemax.z;
     float distance = sqrt((x - sphereCenter.x) * (x-sphereCenter.x) +
                           (y - sphereCenter.y) * (y-sphereCenter.y) +
                           (z - sphereCenter.z) * (z-sphereCenter.z));
