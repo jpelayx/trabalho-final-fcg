@@ -339,12 +339,15 @@ int main(int argc, char* argv[])
     // vars da camera
     glm::vec4 move = glm::vec4(0.0f,0.0f,0.0f,0.0f); // vetor que representa o deslocamento da posicao inicial
     glm::vec4 camera_position_c; // Ponto "c", centro da câmera
+    glm::vec4 deadpos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+    glm::vec4 camera_lookat_l;
     glm::vec4 camera_view_vector; // Vetor "view", sentido para onde a câmera está virada
     glm::vec4 camera_up_vector; // Vetor "up" fixado para apontar para o "céu" (eito Y global)
     glm::vec4 old_move = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // vetor que representa o deslocamento da posicao inicial
 
     float speed = 3.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
+    float deadTheta = 0.0f;
 
     int lives = 3;
 
@@ -390,22 +393,30 @@ int main(int argc, char* argv[])
         float delta_t = current_time - prev_time;
         prev_time = current_time;
 
-        // W
-        if (g_W_state)
-        {
-            move += -w_camera * speed * delta_t;
-        }
-        // S
-        if (g_S_state)
-        {
-            move += +w_camera * speed * delta_t;
-        }
+        if (lives != 0) {
+            // W
+            if (g_W_state)
+            {
+                move += -w_camera * speed * delta_t;
+            }
+            // S
+            if (g_S_state)
+            {
+                move += +w_camera * speed * delta_t;
+            }
 
-        // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-        // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + move; // Ponto "c", centro da câmera
-        camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
-        camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
+            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+            camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + move; // Ponto "c", centro da câmera
+            camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
+            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        } else {
+            std::cout << deadpos.x << " " << deadpos.y << " " << deadpos.z << std::endl;
+            camera_position_c  = glm::vec4(x + deadpos.x, y + deadpos.y,z + deadpos.z,1.0f); // Ponto "c", centro da câmera
+            camera_lookat_l    = glm::vec4(deadpos.x, deadpos.y, deadpos.z, 1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+            camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
+            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        }
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -455,12 +466,21 @@ int main(int argc, char* argv[])
 
         bool collision = false;
 
-        glm::mat4 car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
+        glm::mat4 car_model;
+        if (lives > 0) {
+            car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                             * Matrix_Rotate_X(0.0f)
                             * Matrix_Rotate_Y(g_CameraTheta + 3.1415f)
                             * Matrix_Rotate_Z(0.0f)
                             * Matrix_Scale(0.10f, 0.10f, 0.10f);
-        
+        }else {
+            car_model = Matrix_Translate(deadpos.x, deadpos.y - 0.25f,deadpos.z)
+                            * Matrix_Rotate_X(0.0f)
+                            * Matrix_Rotate_Y(deadTheta + 3.1415f)
+                            * Matrix_Rotate_Z(0.0f)
+                            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        }
+
         // Desenhamos o modelo da esfera
         glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(-1+10, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-5, 0, 10), glm::vec3(-10+10, 0, 5) );
         model = Matrix_Translate(bz.x,bz.y,bz.z)
@@ -471,19 +491,19 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x, 
+        collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
-                                                               1.0f), 
-                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x, 
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x, 
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
                                                                g_VirtualScene["sphere"].bbox_min.y,
                                                                g_VirtualScene["sphere"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x, 
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
@@ -498,23 +518,23 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x, 
+        collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
-                                                               1.0f), 
-                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x, 
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x, 
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
                                                                g_VirtualScene["sphere"].bbox_min.y,
                                                                g_VirtualScene["sphere"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x, 
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
-        
+
         // Desenhamos as paredes
         model = Matrix_Translate(7.0f,-1.1f,0.0f)
               * Matrix_Scale(5.0f, 5.0f, 5.0f)
@@ -523,38 +543,41 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
 
-        collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x, 
+        collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
-                                                               1.0f), 
-                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x, 
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_min.x, 
+                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_min.x,
                                                                g_VirtualScene["plane"].bbox_min.y,
                                                                g_VirtualScene["plane"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_max.x, 
+                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_max.x,
                                                                g_VirtualScene["plane"].bbox_max.y,
                                                                g_VirtualScene["plane"].bbox_max.z,
                                                                1.0f));
 
         //std::cout << collision << std::endl;
 
-        if(collision)
+        if(collision && lives > 0)
         {
             lives -= 1;
-            if (lives < 0)
-                lives = 3;
-                
-            //camera_position_c = camera_position_c - move + old_move;
-            //move = old_move;
-            //g_CameraTheta = g_oldCameraTheta;
+            if (lives == 0) {
+                deadpos = camera_position_c;
+                deadTheta = g_CameraTheta;
+            } else {
+                //camera_position_c = camera_position_c - move + old_move;
+                //move = old_move;
+                //g_CameraTheta = g_oldCameraTheta;
 
-            camera_position_c = camera_position_c - move;
-            move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
-            g_CameraTheta = 0.0f;
+                camera_position_c = camera_position_c - move;
+                move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+                g_CameraTheta = 0.0f;
+
+            }
 
             car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                         * Matrix_Rotate_X(0.0f)
@@ -576,7 +599,7 @@ int main(int argc, char* argv[])
 
 
 
-        
+
         old_move = move;
         g_oldCameraTheta = g_CameraTheta;
 
