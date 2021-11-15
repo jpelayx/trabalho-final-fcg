@@ -13,6 +13,9 @@ in vec4 position_model;
 // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
 in vec2 texcoords;
 
+// cor 
+in vec3 cor_v;
+
 // Matrizes computadas no código C++ e enviadas para a GPU
 uniform mat4 model;
 uniform mat4 view;
@@ -111,6 +114,7 @@ void main()
         // Cor final com correção gamma, considerando monitor sRGB.
         // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
         color = pow(color, vec3(1.0,1.0,1.0)/2.2);
+        color = vec3(cor_v.x, cor_v.y, cor_v.z);
     }
     else if ( object_id == BUNNY )
     {
@@ -197,6 +201,7 @@ void main()
         // Cor final com correção gamma, considerando monitor sRGB.
         // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
         color = pow(color, vec3(1.0,1.0,1.0)/2.2);
+        //color = vec3(cor_v.x, cor_v.y, cor_v.z);
 
     } else {
         float minx = bbox_min.x;
