@@ -129,12 +129,32 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 bool collisionCubeCube(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
 bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax);
 bool collisionSphereSphere(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
+bool collisionCubePlane(glm::vec4 bbcmin, glm::vec4 bbcmax, glm::vec4 bbpmin, glm::vec4 bbpmax);
 
 // curvas de bezier
 glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4);
 
+
+// geração de obstáculos
+enum obstacle_type {SPHERE, PLANE, CUBE};
+
+struct Obstacle
+{
+    obstacle_type type;
+    glm::mat4 model;
+    bool animated;
+    vector<glm::vec4> bezier_points;
+    bool              bezier_inverse;
+};
+
+
+vector<Obstacle> initializeObstacles(int num);
+bool drawObstacles(vector<Obstacle> obstacles, glm::mat4 car_model);
+
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
+
+
 struct SceneObject
 {
     std::string  name;        // Nome do objeto
@@ -145,6 +165,7 @@ struct SceneObject
     glm::vec3    bbox_min; // Axis-Aligned Bounding Box do objeto
     glm::vec3    bbox_max;
 };
+
 
 // Abaixo definimos variáveis globais utilizadas em várias funções do código.
 
@@ -351,6 +372,11 @@ int main(int argc, char* argv[])
 
     int lives = 3;
 
+    int num_obstacles = 10;
+    vector<Obstacle> obstacles = initializeObstacles(10);
+
+    int sign = 1;
+
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -391,7 +417,7 @@ int main(int argc, char* argv[])
         // Atualiza delta de tempo
         float current_time = (float)glfwGetTime();
         float delta_t = current_time - prev_time;
-        prev_time = current_time;
+        //prev_time = current_time;
 
         if (lives != 0) {
             // W
@@ -467,6 +493,7 @@ int main(int argc, char* argv[])
         bool collision = false;
 
         glm::mat4 car_model;
+        glm::mat4 model_sphere1;
         if (lives > 0) {
             car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                             * Matrix_Rotate_X(0.0f)
@@ -481,13 +508,16 @@ int main(int argc, char* argv[])
                             * Matrix_Scale(1.0f, 1.0f, 1.0f);
         }
 
+        //bool collision = drawObstacles(car_model, obstacles);
+
         // Desenhamos o modelo da esfera
         glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(-1+10, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-5, 0, 10), glm::vec3(-10+10, 0, 5) );
-        model = Matrix_Translate(bz.x,bz.y,bz.z)
+        //glm::vec3 bz = bezier(prev_time + sign*delta_t, 10.0, sphere_pos_1[0], sphere_pos_1[1],sphere_pos_1[2],sphere_pos_1[3] );
+        model_sphere1 = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model_sphere1));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
@@ -499,16 +529,16 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
+                                                     model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
                                                                g_VirtualScene["sphere"].bbox_min.y,
                                                                g_VirtualScene["sphere"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
+                                                     model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
 
-        bz = bezier(current_time, 10.0, glm::vec3(-1 + 2+10, 1, 2), glm::vec3(-1.5 + 2, 1, 15), glm::vec3(-5 + 2, 1, 10), glm::vec3(-10 + 10, 1, 5) );
+        bz = bezier(current_time, 10.0, glm::vec3(-10+10, 0, 5), glm::vec3(-5, 0, 10), glm::vec3(-1.5, 0, 15), glm::vec3(-1+10, 0, 2) );
         model = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Scale(2.0f, 2.0f, 2.0f)
               * Matrix_Rotate_Z(0.6f)
@@ -535,9 +565,29 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
 
+        bool collision_sphere = collisionSphereSphere(model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
+                                                               g_VirtualScene["sphere"].bbox_min.y,
+                                                               g_VirtualScene["sphere"].bbox_min.z,
+                                                               1.0f),
+                                                     model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
+                                                               g_VirtualScene["sphere"].bbox_max.y,
+                                                               g_VirtualScene["sphere"].bbox_max.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
+                                                               g_VirtualScene["sphere"].bbox_min.y,
+                                                               g_VirtualScene["sphere"].bbox_min.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["sphere"].bbox_max.x,
+                                                               g_VirtualScene["sphere"].bbox_max.y,
+                                                               g_VirtualScene["sphere"].bbox_max.z,
+                                                               1.0f));
+        if (collision_sphere) {
+            sign = -sign;
+        }
+
         // Desenhamos as paredes
         model = Matrix_Translate(7.0f,-1.1f,0.0f)
-              * Matrix_Scale(5.0f, 5.0f, 5.0f)
+              * Matrix_Scale(1.0f, 5.0f, 5.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
@@ -560,7 +610,7 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["plane"].bbox_max.z,
                                                                1.0f));
 
-        //std::cout << collision << std::endl;
+        std::cout << collision << std::endl;
 
         if(collision && lives > 0)
         {
@@ -599,7 +649,7 @@ int main(int argc, char* argv[])
 
 
 
-
+        prev_time = current_time;
         old_move = move;
         g_oldCameraTheta = g_CameraTheta;
 
@@ -643,6 +693,27 @@ int main(int argc, char* argv[])
 
     // Fim do programa
     return 0;
+}
+
+vector<Obstacle> initializeObstacles(int num)
+{
+    vector<Obstacle> obstacles;
+    for (int i=0; i<num; i++)
+    {
+        Obstacle obs;
+        obs.animated = true;
+        obs.bezier_inverse = false;
+        obs.bezier_points.push_back(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+        //obs.bezier_points.push_back();
+        //obs.bezier_points.push_back();
+        //obs.bezier_points.push_back();
+        obstacles.push_back(obs);
+    }
+}
+
+bool drawObstacles(vector<Obstacle> obstacles, glm::mat4 car_model)
+{
+
 }
 
 // Função que carrega uma imagem para ser utilizada como textura
