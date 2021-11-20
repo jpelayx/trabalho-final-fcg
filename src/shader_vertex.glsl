@@ -15,7 +15,9 @@ uniform mat4 projection;
 #define SPHERE 0
 #define BUNNY  1
 #define PLANE  2
-#define CAR    3
+#define GROUND 5
+#define CAR 3
+#define BULL 4
 uniform int object_id;
 
 // Atributos de v�rtice que ser�o gerados como sa�da ("out") pelo Vertex Shader.
