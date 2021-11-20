@@ -6,8 +6,20 @@
 using namespace std;
 
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
+
 bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
-    // std::cout << " bb1min " <<bb1min.x <<" " << bb1min.y << " " << bb1min.z << " bb1max " << bb1max.x << " " << bb1max.y << " " << bb1max.z << std::endl;
+    for(int i = 0; i<3; i++) {
+        if ((bb1min[i] < bb2min[i] &&  bb1min[i] < bb2max[i] && bb1max[i] < bb2min[i] &&  bb1max[i] < bb2max[i])
+            ||
+            (bb2min[i] < bb1min[i] &&  bb2min[i] < bb1max[i] && bb2max[i] < bb1min[i] &&  bb2max[i] < bb1max[i]))
+            return false;
+    }
+    return true;
+}
+
+/*
+bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
+    std::cout << " bb1min " <<bb1min.x <<" " << bb1min.y << " " << bb1min.z << " bb1max " << bb1max.x << " " << bb1max.y << " " << bb1max.z << std::endl;
     std::cout << " bb2min " <<bb2min.x <<" " << bb2min.y << " " << bb2min.z << " bb2max " << bb2max.x << " " << bb2max.y << " " << bb2max.z << std::endl;
     //bool colx = min(bb1min.x, bb1max.x) <= max(bb2min.x, bb2max.x) && max(bb1min.x, bb1max.x) >= min(bb2min.x, bb2max.x);
     //bool coly = min(bb1min.y, bb1max.y) <= max(bb2min.y, bb2max.y) && max(bb1min.y, bb1max.y) >= min(bb2min.y, bb2max.y);
@@ -17,7 +29,7 @@ bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm
     bool colz = bb1min.z <= bb2max.z && bb1max.z >= bb2min.z;
     // std::cout << "COLISAO" << (colx && coly && colz) << std::endl;
     return colx && coly && colz;
-}
+}*/
 
 //http://www.miguelcasillas.com/?p=43
 bool collisionCubePlane(glm::vec4 bbcmin, glm::vec4 bbcmax, glm::vec4 bbpmin, glm::vec4 bbpmax) {

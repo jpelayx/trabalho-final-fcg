@@ -330,6 +330,10 @@ int main(int argc, char* argv[])
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
+    ObjModel cubemodel("../../data/cube.obj");
+    ComputeNormals(&cubemodel);
+    BuildTrianglesAndAddToVirtualScene(&cubemodel);
+
     if ( argc > 1 )
     {
         ObjModel model(argv[1]);
@@ -459,7 +463,7 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -40.0f; // Posição do "far plane"
+        float farplane  = -90.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -512,7 +516,7 @@ int main(int argc, char* argv[])
                             * Matrix_Rotate_X(0.0f)
                             * Matrix_Rotate_Y(deadTheta + 3.1415f)
                             * Matrix_Rotate_Z(0.0f)
-                            * Matrix_Scale(0.10f, 0.10f, 0.10f);
+                            * Matrix_Scale(0.8f,0.8f,0.8f);
         }
 
         //bool collision = drawObstacles(car_model, obstacles);
@@ -524,7 +528,7 @@ int main(int argc, char* argv[])
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
-        
+
 
         collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
@@ -549,7 +553,7 @@ int main(int argc, char* argv[])
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
-        
+
         /*
         collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
@@ -601,7 +605,7 @@ int main(int argc, char* argv[])
               * Matrix_Scale(2.0f, 2.0f, 2.0f)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
-              * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);  
+              * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
         } else if (collision_sphere) {
             sign = -sign;
             // nao atualiza sphere_time
@@ -618,13 +622,13 @@ int main(int argc, char* argv[])
         DrawVirtualObject("sphere");
 
         // Desenhamos as paredes
-        model = Matrix_Translate(7.0f,-1.1f,0.0f)
-              * Matrix_Scale(1.0f, 5.0f, 5.0f)
+        model = Matrix_Translate(-10.0f,-1.1f,-40.0f)
+              * Matrix_Scale(1.0f, 5.0f, 100.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, GROUND);
-        DrawVirtualObject("plane");
-        
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("cube");
+
 
         collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
@@ -634,49 +638,129 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_min.x,
-                                                               g_VirtualScene["plane"].bbox_min.y,
-                                                               g_VirtualScene["plane"].bbox_min.z,
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_min.x,
+                                                               g_VirtualScene["cube"].bbox_min.y,
+                                                               g_VirtualScene["cube"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_max.x,
-                                                               g_VirtualScene["plane"].bbox_max.y,
-                                                               g_VirtualScene["plane"].bbox_max.z,
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_max.x,
+                                                               g_VirtualScene["cube"].bbox_max.y,
+                                                               g_VirtualScene["cube"].bbox_max.z,
                                                                1.0f));
 
+        // Desenhamos as paredes
+        model = Matrix_Translate(71.0f,-1.1f,-40.0f)
+              * Matrix_Scale(1.0f, 5.0f, 100.0f)
+              * Matrix_Rotate_Z(3.1415f/2.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("cube");
+
+
+        collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
+                                                            g_VirtualScene["car"].bbox_min.y,
+                                                               g_VirtualScene["car"].bbox_min.z,
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
+                                                               g_VirtualScene["car"].bbox_max.y,
+                                                               g_VirtualScene["car"].bbox_max.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_min.x,
+                                                               g_VirtualScene["cube"].bbox_min.y,
+                                                               g_VirtualScene["cube"].bbox_min.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_max.x,
+                                                               g_VirtualScene["cube"].bbox_max.y,
+                                                               g_VirtualScene["cube"].bbox_max.z,
+                                                               1.0f));
 
         // Desenhamos as paredes
+        model = Matrix_Translate(71.0f,-1.1f,-40.0f) 
+              * Matrix_Scale(100.0f, 5.0f, 1.0f)
+              * Matrix_Rotate_Z(3.1415f/2.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("cube");
+
+
+        collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
+                                                            g_VirtualScene["car"].bbox_min.y,
+                                                               g_VirtualScene["car"].bbox_min.z,
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
+                                                               g_VirtualScene["car"].bbox_max.y,
+                                                               g_VirtualScene["car"].bbox_max.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_min.x,
+                                                               g_VirtualScene["cube"].bbox_min.y,
+                                                               g_VirtualScene["cube"].bbox_min.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_max.x,
+                                                               g_VirtualScene["cube"].bbox_max.y,
+                                                               g_VirtualScene["cube"].bbox_max.z,
+                                                               1.0f));       
+
+        // Desenhamos as paredes
+        model = Matrix_Translate(71.0f,-1.1f,40.0f) 
+              * Matrix_Scale(100.0f, 5.0f, 1.0f)
+              * Matrix_Rotate_Z(3.1415f/2.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("cube");
+
+
+        collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
+                                                            g_VirtualScene["car"].bbox_min.y,
+                                                               g_VirtualScene["car"].bbox_min.z,
+                                                               1.0f),
+                                                    car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
+                                                               g_VirtualScene["car"].bbox_max.y,
+                                                               g_VirtualScene["car"].bbox_max.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_min.x,
+                                                               g_VirtualScene["cube"].bbox_min.y,
+                                                               g_VirtualScene["cube"].bbox_min.z,
+                                                               1.0f),
+                                                     model * glm::vec4(g_VirtualScene["cube"].bbox_max.x,
+                                                               g_VirtualScene["cube"].bbox_max.y,
+                                                               g_VirtualScene["cube"].bbox_max.z,
+                                                               1.0f));                                                       
+                                                                                                       
+
+
+        // touro
         model = Matrix_Translate(5.0f,-1.1f,0.0f)
               * Matrix_Scale(0.01f, 0.01f, 0.01f)
               * Matrix_Rotate_X(3.1415f*1.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BULL);
         DrawVirtualObject("bull");
-        
+
 
         collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
-                                                               g_VirtualScene["car"].bbox_min.z,
+                                                               g_VirtualScene["bull"].bbox_min.z,
                                                                1.0f),
                                                     car_model * glm::vec4(g_VirtualScene["car"].bbox_max.x,
                                                                g_VirtualScene["car"].bbox_max.y,
                                                                g_VirtualScene["car"].bbox_max.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_min.x,
-                                                               g_VirtualScene["plane"].bbox_min.y,
-                                                               g_VirtualScene["plane"].bbox_min.z,
+                                                     model * glm::vec4(g_VirtualScene["bull"].bbox_min.x,
+                                                               g_VirtualScene["bull"].bbox_min.y,
+                                                               g_VirtualScene["bull"].bbox_min.z,
                                                                1.0f),
-                                                     model * glm::vec4(g_VirtualScene["plane"].bbox_max.x,
-                                                               g_VirtualScene["plane"].bbox_max.y,
-                                                               g_VirtualScene["plane"].bbox_max.z,
-                                                               1.0f));                                                       
+                                                     model * glm::vec4(g_VirtualScene["bull"].bbox_max.x,
+                                                               g_VirtualScene["bull"].bbox_max.y,
+                                                               g_VirtualScene["bull"].bbox_max.z,
+                                                               1.0f));
 
-        std::cout << collision << std::endl;
+        //std::cout << collision << std::endl;
 
         if(collision && lives > 0)
         {
             lives -= 1;
             if (lives == 0) {
                 deadpos = camera_position_c;
+                deadpos.y = deadpos.y -0.85f;
                 deadTheta = g_CameraTheta;
             } else {
                 //camera_position_c = camera_position_c - move + old_move;
