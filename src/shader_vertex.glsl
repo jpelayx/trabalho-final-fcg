@@ -13,11 +13,11 @@ uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
-#define BUNNY  1
+#define SPHERE1 1
 #define PLANE  2
-#define GROUND 5
 #define CAR 3
 #define BULL 4
+#define GROUND 5
 uniform int object_id;
 
 // Atributos de v�rtice que ser�o gerados como sa�da ("out") pelo Vertex Shader.
@@ -74,7 +74,7 @@ void main()
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;
 
-    if (object_id == SPHERE) {
+    if (object_id == SPHERE1) {
 
         // Obtemos a posição da câmera utilizando a inversa da matriz que define o
         // sistema de coordenadas da câmera.

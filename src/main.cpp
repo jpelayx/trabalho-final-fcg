@@ -328,6 +328,7 @@ int main(int argc, char* argv[])
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/estrada3.jpg");      // TextureImage0
     LoadTextureImage("../../data/carro.jpg"); // TextureImage1
+    LoadTextureImage("../../data/wall.jpg"); // TextureImage2
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -525,11 +526,11 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
         #define SPHERE 0
-        #define BUNNY  1
+        #define SPHERE1 1
         #define PLANE  2
-        #define GROUND 5
         #define CAR 3
         #define BULL 4
+        #define GROUND 5
 
         bool collision = false;
 
@@ -862,7 +863,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
         DrawVirtualObject("sphere");
 
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
+        glUniform1i(object_id_uniform, SPHERE1);
         DrawVirtualObject("sphere");
 }
 
@@ -1672,6 +1673,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         camera_position_c = camera_position_c - g_move;
         g_move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
         g_CameraTheta = 0.0f;
+        g_CameraPhi = 0.0f;
         lives = max_lives;
     }                
 
@@ -1685,7 +1687,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     // Se o usuário apertar a tecla O, utilizamos projeção ortográfica.
     if (key == GLFW_KEY_K && action == GLFW_PRESS)
     {
-        g_increment_size += 0.01f;
+        g_increment_size += 0.005f;
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
