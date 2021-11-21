@@ -385,19 +385,20 @@ int main(int argc, char* argv[])
     float prev_time = (float)glfwGetTime();
     float deadTheta = 0.0f;
 
-    int lives = 0;
+    int lives = 1;
 
     vector<Obstacle> obstacles;
     // obstáculos móveis
     int num_spheres = 10;
     initializeMovingSpheres(num_spheres, obstacles); // inicializa esferas
-    cout << "spheres ";
+    cout << "spheres, " ;
     int num_bulls = 5;
     initializeBulls(num_bulls, obstacles); // inicializa touros
-    cout << "bulls ";
+    cout << "bulls, ";
     // obstáculos imóveis
-    glm::vec3 game_area_min = glm::vec3(-10.0f, g_GroundLevel, -20.0f),
-              game_area_max = glm::vec3( 10.0f, g_GroundLevel,  20.0f);
+    float ratio = 9.0/16.0;
+    glm::vec3 game_area_min = glm::vec3(-50.0f, g_GroundLevel, -50.0f*ratio),
+              game_area_max = glm::vec3( 50.0f, g_GroundLevel,  50.0f*ratio);
     initializeWalls(game_area_min, game_area_max, obstacles); // delimitação da área do jogo
     cout << "all things initialized" << endl;
     // initializeTrackBarriers(obstacles);  // barreiras ao redor da pista 
@@ -866,41 +867,42 @@ void initializeMovingSpheres(int num, vector<Obstacle> &obstacles)
     for (int i=0; i<num; i++)
     {
         Obstacle obs;
+        obs.type = SPHERE;
         obs.animated = true;
         obs.bezier_reverse = false;
-        obs.bezier_points = randomCubicBezier(glm::vec3(-7.0f, 0.0f, -7.0f),
-                                              glm::vec3( 7.0f, 0.0f,  7.0f));
-        cout << i << " start: " << obs.bezier_points[0].x << "," << obs.bezier_points[0].y << "," << obs.bezier_points[0].z << endl
-             << "   end: " << obs.bezier_points[3].x << "," << obs.bezier_points[3].y << "," << obs.bezier_points[3].z << endl;
-        obs.period = rand()/RAND_MAX * 30.0f + 15.0f; // num aleatorio de 0 a 30 segundos 
+        obs.bezier_points = randomCubicBezier(glm::vec3(-50.0f, 0.0f, -45.0f),
+                                              glm::vec3( 50.0f, 0.0f,  45.0f));
+        // cout << i << " start: " << obs.bezier_points[0].x << "," << obs.bezier_points[0].y << "," << obs.bezier_points[0].z << endl
+            //  << "   end: " << obs.bezier_points[3].x << "," << obs.bezier_points[3].y << "," << obs.bezier_points[3].z << endl;
+        obs.period = (float)rand()/(float)RAND_MAX * 30.0f + 15.0f; // num aleatorio de 0 a 30 segundos 
         obstacles.push_back(obs);
     }
 }
 
 void initializeBulls(int num, vector<Obstacle> &obstacles)
 {
-    cout << "touro :)" << endl;
     float min_bull_size = 1.0,
-          max_bull_size = 5.0;
-    glm::vec3 min_bull_area = glm::vec3(-10.0, 0.0, -10.0),
-              max_bull_area = glm::vec3( 10.0, 0.0,  10.0);
+          max_bull_size = 10.0;
+    glm::vec3 min_bull_area = glm::vec3(-15.0, 0.0, -15.0),
+              max_bull_area = glm::vec3( 15.0, 0.0,  15.0);
     for(int i=0; i<num; i++)
     {
         Obstacle obs;
+        obs.type = BULL;
         obs.animated = false;
         float size = (rand()%(int)(max_bull_size - min_bull_size)) + min_bull_size;
-        cout << "tamanho " << size << endl;
+        // cout << "tamanho " << size << endl;
         glm::vec3 pos = glm::vec3((rand()%((int)(max_bull_area.x - min_bull_area.x))) + min_bull_area.x,
                                    g_GroundLevel,
                                   (rand()%((int)(max_bull_area.z - min_bull_area.z))) + min_bull_area.z);
-        cout << "posiçao (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << endl;
+        // cout << "posiçao (" << pos.x << ", " << pos.y << ", " << pos.z << ")" << endl;
         obs.model = Matrix_Translate(pos.x, pos.y, pos.z)
-                  * Matrix_Scale(0.01*size, 0.01*size, 0.01*size)
-                  * Matrix_Rotate_X(rand()/RAND_MAX * 2.0*3.1415);
-        cout << "rotação " << rand()/RAND_MAX * 2.0*3.1415 << endl; 
+                  * Matrix_Scale(0.001*size, 0.001*size, 0.001*size)
+                  * Matrix_Rotate_X(-3.1415f/2.0f)
+                  * Matrix_Rotate_Z((float)rand()/(float)RAND_MAX * 2.0*3.1415);
+        // cout << "rotação " << rand()/RAND_MAX * 2.0*3.1415 << endl; 
         obstacles.push_back(obs);
     }
-    cout << "touro :(" << endl;
 }
 
 void initializeWalls(glm::vec3 min, glm::vec3 max, vector<Obstacle> &obstacles)
@@ -954,6 +956,7 @@ bool drawObstacles(vector<Obstacle> obstacles, glm::mat4 car_model, float time)
         switch (obstacles[i].type)
         {
         case SPHERE:
+            // cout << "desenhando esferas " << endl;
             if(obstacles[i].animated)
             {
                 // determina posição do objeto com a curva de bezier
@@ -1113,6 +1116,7 @@ bool drawObstacles(vector<Obstacle> obstacles, glm::mat4 car_model, float time)
             }
             break;
         case BULL:
+            // cout << "desenhando touro :(" << endl;
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(obstacles[i].model));
             glUniform1i(object_id_uniform, BULL);
             DrawVirtualObject("bull");

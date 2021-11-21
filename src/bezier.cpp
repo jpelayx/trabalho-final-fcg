@@ -14,19 +14,19 @@ vector<glm::vec3> randomCubicBezier(glm::vec3 min, glm::vec3 max)
     vector<glm::vec3> pts;
 
     // primeiro ponto, obrigatório começar no chão 
-    glm::vec3 p0 = glm::vec3( (max.x - min.x)*(rand()/RAND_MAX) + min.x,
-                              0.0f, 
-                              (max.z - min.z)*(rand()/RAND_MAX) + min.z );
+    glm::vec3 p0 = glm::vec3( (max.x - min.x)*((float)rand()/(float)RAND_MAX) + min.x,
+                              -1.1f, 
+                              (max.z - min.z)*((float)rand()/RAND_MAX) + min.z );
     // segundo ponto em diante, nenhuma outra restrição
-    glm::vec3 p1 = glm::vec3( (max.x - min.x)*(rand()/RAND_MAX) + min.x,
-                              (max.y - min.y)*(rand()/RAND_MAX) + min.y, 
-                              (max.z - min.z)*(rand()/RAND_MAX) + min.z );
-    glm::vec3 p2 = glm::vec3( (max.x - min.x)*(rand()/RAND_MAX) + min.x,
-                              (max.y - min.y)*(rand()/RAND_MAX) + min.y, 
-                              (max.z - min.z)*(rand()/RAND_MAX) + min.z );
-    glm::vec3 p3 = glm::vec3( (max.x - min.x)*(rand()/RAND_MAX) + min.x,
-                              (max.y - min.y)*(rand()/RAND_MAX) + min.y, 
-                              (max.z - min.z)*(rand()/RAND_MAX) + min.z );
+    glm::vec3 p1 = glm::vec3( (max.x - min.x)*((float)rand()/(float)RAND_MAX) + min.x,
+                              (max.y - min.y)*((float)rand()/(float)RAND_MAX) + min.y, 
+                              (max.z - min.z)*((float)rand()/(float)RAND_MAX) + min.z );
+    glm::vec3 p2 = glm::vec3( (max.x - min.x)*((float)rand()/(float)RAND_MAX) + min.x,
+                              (max.y - min.y)*((float)rand()/(float)RAND_MAX) + min.y, 
+                              (max.z - min.z)*((float)rand()/(float)RAND_MAX) + min.z );
+    glm::vec3 p3 = glm::vec3( (max.x - min.x)*((float)rand()/(float)RAND_MAX) + min.x,
+                              (max.y - min.y)*((float)rand()/(float)RAND_MAX) + min.y, 
+                              (max.z - min.z)*((float)rand()/(float)RAND_MAX) + min.z );
     
     cout << rand()/RAND_MAX << endl;
     
