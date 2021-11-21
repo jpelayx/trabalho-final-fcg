@@ -129,7 +129,6 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 bool collisionCubeCube(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
 bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax);
 bool collisionSphereSphere(glm::vec3 bb1min, glm::vec3 bb1max, glm::vec3 bb2min, glm::vec3 bb2max);
-bool collisionCubePlane(glm::vec4 bbcmin, glm::vec4 bbcmax, glm::vec4 bbpmin, glm::vec4 bbpmax);
 
 // curvas de bezier
 glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4);

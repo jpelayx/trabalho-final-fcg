@@ -161,9 +161,9 @@ void main()
         l = normalize(camera_position - p);
 
         // Vetor que define o sentido da reflexão especular ideal.
-        r = -l + 2*n*(dot(n,l)); // PREENCHA AQUI o vetor de reflexão especular ideal
+        //r = -l + 2*n*(dot(n,l)); // PREENCHA AQUI o vetor de reflexão especular ideal
         // half-vector
-        h = normalize(v+l);
+        //h = normalize(v+l);
 
         float minx = bbox_min.x;
         float maxx = bbox_max.x;
@@ -264,33 +264,33 @@ void main()
         //color = pow(color, vec3(1.0,1.0,1.0)/2.2);
         // Parâmetros que definem as propriedades espectrais da superfície
         vec3 Kd; // Refletância difusa
-        vec3 Ks; // Refletância especular
-        vec3 Ka; // Refletância ambiente
+        //vec3 Ks; // Refletância especular
+        //vec3 Ka; // Refletância ambiente
         float q; // Expoente especular para o modelo de iluminação de Phong
 
         Kd = vec3(0.08,0.4,0.8);
-        Ks = vec3(0.8,0.8,0.8);
-        Ka = vec3(0.04,0.2,0.4);
-        q = 32.0;
+        //Ks = vec3(0.8,0.8,0.8);
+        //Ka = vec3(0.04,0.2,0.4);
+        //q = 32.0;
         
         // Espectro da fonte de iluminação
         vec3 I = vec3(1.0,1.0,1.0); // PREENCHA AQUI o espectro da fonte de luz
 
         // Espectro da luz ambiente
-        vec3 Ia = vec3(0.2,0.2,0.2); // PREENCHA AQUI o espectro da luz ambiente
+        //vec3 Ia = vec3(0.2,0.2,0.2); // PREENCHA AQUI o espectro da luz ambiente
 
         // Termo difuso utilizando a lei dos cossenos de Lambert
         vec3 lambert_diffuse_term = Kd*I*max(0, dot(n,l)); // PREENCHA AQUI o termo difuso de Lambert
 
         // Termo ambiente
-        vec3 ambient_term = Ka*Ia; // PREENCHA AQUI o termo ambiente
+        //vec3 ambient_term = Ka*Ia; // PREENCHA AQUI o termo ambiente
 
         // Termo especular utilizando o modelo de iluminação de Phong
-        vec3 phong_specular_term  = Ks*I*pow(max(0, dot(n,h)), q); // PREENCHA AQUI o termo especular de Phong
+        //vec3 phong_specular_term  = Ks*I*pow(max(0, dot(n,h)), q); // PREENCHA AQUI o termo especular de Phong
 
         // Cor final do fragmento calculada com uma combinação dos termos difuso,
         // especular, e ambiente. Veja slide 129 do documento Aula_17_e_18_Modelos_de_Iluminacao.pdf.
-        color = lambert_diffuse_term + ambient_term + phong_specular_term;
+        color = lambert_diffuse_term;
 
         // Cor final com correção gamma, considerando monitor sRGB.
         // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
