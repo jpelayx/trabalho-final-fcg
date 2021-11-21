@@ -238,6 +238,17 @@ GLint  object_id_uniform;
 GLint  bbox_min_uniform;
 GLint  bbox_max_uniform;
 
+// objects increment of size
+float g_increment_size = 0.0f;
+
+// variaveis da camera que precisam ser globais
+glm::vec4 g_move = glm::vec4(0.0f,0.0f,0.0f,0.0f); // vetor que representa o deslocamento da posicao inicial
+glm::vec4 camera_position_c; // Ponto "c", centro da câmera
+
+// vidas
+int max_lives = 3;
+int lives = max_lives;
+
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
@@ -371,8 +382,6 @@ int main(int argc, char* argv[])
     glm::mat4 the_view;
 
     // vars da camera
-    glm::vec4 move = glm::vec4(0.0f,0.0f,0.0f,0.0f); // vetor que representa o deslocamento da posicao inicial
-    glm::vec4 camera_position_c; // Ponto "c", centro da câmera
     glm::vec4 deadpos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
     glm::vec4 camera_lookat_l;
     glm::vec4 camera_view_vector; // Vetor "view", sentido para onde a câmera está virada
@@ -383,14 +392,13 @@ int main(int argc, char* argv[])
     float prev_time = (float)glfwGetTime();
     float deadTheta = 0.0f;
 
-    int lives = 1;
 
     int num_obstacles = 10;
     vector<Obstacle> obstacles = initializeObstacles(10);
 
     glm::vec3 bz;
 
-    vector<glm::vec3> sphere_pos1{glm::vec3(-1+10, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-10, 0, 10), glm::vec3(-5, 0, 5)};
+    vector<glm::vec3> sphere_pos1{glm::vec3(-1+10, 0, 2), glm::vec3(-1.5, 0, 15), glm::vec3(-10, 1, 10), glm::vec3(-5, 1, 5)};
     float sphere_time1 = 0.0f;
     int sign1 = 1;
 
@@ -411,7 +419,7 @@ int main(int argc, char* argv[])
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
-        std::cout << "VIDAS " << lives << std::endl;
+        //std::cout << "VIDAS " << lives << std::endl;
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -454,17 +462,17 @@ int main(int argc, char* argv[])
             // W
             if (g_W_state)
             {
-                move += -w_camera * speed * delta_t;
+                g_move += -w_camera * speed * delta_t;
             }
             // S
             if (g_S_state)
             {
-                move += +w_camera * speed * delta_t;
+                g_move += +w_camera * speed * delta_t;
             }
 
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
             // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-            camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + move; // Ponto "c", centro da câmera
+            camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + g_move; // Ponto "c", centro da câmera
             camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         } else {
@@ -683,8 +691,8 @@ int main(int argc, char* argv[])
                 //move = old_move;
                 //g_CameraTheta = g_oldCameraTheta;
 
-                camera_position_c = camera_position_c - move;
-                move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+                camera_position_c = camera_position_c - g_move;
+                g_move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
                 g_CameraTheta = 0.0f;
 
             }
@@ -710,7 +718,7 @@ int main(int argc, char* argv[])
 
 
         prev_time = current_time;
-        old_move = move;
+        old_move = g_move;
         g_oldCameraTheta = g_CameraTheta;
 
         TextRendering_PrintLives(window, lives);
@@ -860,7 +868,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
 
 void draw_bull(bool &collision, glm::vec3 &bull_pos1, glm::mat4 &model, glm::mat4 &car_model){
     model = Matrix_Translate(bull_pos1.x,bull_pos1.y,bull_pos1.z)
-              * Matrix_Scale(0.01f, 0.01f, 0.01f)
+              * Matrix_Scale(0.01f + g_increment_size, 0.01f, 0.01f + g_increment_size)
               * Matrix_Rotate_X(3.1415f*1.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BULL);
@@ -1654,6 +1662,30 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_ForearmAngleZ = 0.0f;
         g_TorsoPositionX = 0.0f;
         g_TorsoPositionY = 0.0f;
+    }
+
+    
+
+    // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        camera_position_c = camera_position_c - g_move;
+        g_move = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+        g_CameraTheta = 0.0f;
+        lives = max_lives;
+    }                
+
+
+    // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
+    if (key == GLFW_KEY_J && action == GLFW_PRESS)
+    {
+        g_increment_size = 0.0f;
+    }
+
+    // Se o usuário apertar a tecla O, utilizamos projeção ortográfica.
+    if (key == GLFW_KEY_K && action == GLFW_PRESS)
+    {
+        g_increment_size += 0.01f;
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
