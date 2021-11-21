@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
     glm::vec4 camera_up_vector; // Vetor "up" fixado para apontar para o "céu" (eito Y global)
     glm::vec4 old_move = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // vetor que representa o deslocamento da posicao inicial
 
-    float speed = 3.0f; // Velocidade da câmera
+    float speed = 8.0f; // Velocidade da câmera
     float prev_time = (float)glfwGetTime();
     float deadTheta = 0.0f;
 
@@ -394,7 +394,19 @@ int main(int argc, char* argv[])
     float sphere_time1 = 0.0f;
     int sign1 = 1;
 
-    glm::vec3 bull_pos1(5.0f,-1.1f,0.0f);
+    glm::vec3 bull_pos1(0.0f,-1.1f,-5.0f);
+    glm::vec3 bull_pos2(0.0f,-1.1f,15.0f);
+    glm::vec3 bull_pos3(5.0f,-1.1f,30.0f);
+    glm::vec3 bull_pos4(15.0f,-1.1f,35.0f);
+    glm::vec3 bull_pos5(30.0f,-1.1f,32.0f);
+    glm::vec3 bull_pos6(40.0f,-1.1f,30.0f);
+    glm::vec3 bull_pos7(50.0f,-1.1f,30.0f);
+    glm::vec3 bull_pos8(60.0f,-1.1f,28.0f);
+    glm::vec3 bull_pos9(60.0f,-1.1f,8.0f);
+    glm::vec3 bull_pos10(62.0f,-1.1f,-12.0f);
+    glm::vec3 bull_pos11(60.0f,-1.1f,-30.0f);
+    glm::vec3 bull_pos12(30.0f,-1.1f,-28.0f);
+    glm::vec3 bull_pos13(10.0f,-1.1f,-33.0f);
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -644,6 +656,18 @@ int main(int argc, char* argv[])
         // desenha touro
         // trocar bull_pos1
         draw_bull(collision, bull_pos1, model, car_model);
+        draw_bull(collision, bull_pos2, model, car_model);
+        draw_bull(collision, bull_pos3, model, car_model);
+        draw_bull(collision, bull_pos4, model, car_model);
+        draw_bull(collision, bull_pos5, model, car_model);
+        draw_bull(collision, bull_pos6, model, car_model);
+        draw_bull(collision, bull_pos7, model, car_model);
+        draw_bull(collision, bull_pos8, model, car_model);
+        draw_bull(collision, bull_pos9, model, car_model);
+        draw_bull(collision, bull_pos10, model, car_model);
+        draw_bull(collision, bull_pos11, model, car_model);
+        draw_bull(collision, bull_pos12, model, car_model);
+        draw_bull(collision, bull_pos13, model, car_model);
 
         //std::cout << collision << std::endl;
 
@@ -766,7 +790,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
 
-        
+
         collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
@@ -783,7 +807,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
-        
+
         bool collision_sphere = collisionSphereSphere(model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
                                                                g_VirtualScene["sphere"].bbox_min.y,
                                                                g_VirtualScene["sphere"].bbox_min.z,
