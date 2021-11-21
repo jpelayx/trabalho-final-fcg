@@ -691,7 +691,7 @@ int main(int argc, char* argv[])
         {
             lives -= 1;
             if (lives == 0) {
-                deadpos = camera_position_c - g_move + old_move;
+                deadpos = camera_position_c;
                 deadpos.y = deadpos.y -0.85f;
                 deadTheta = g_CameraTheta;
             } else {
