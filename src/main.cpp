@@ -393,8 +393,6 @@ int main(int argc, char* argv[])
     float deadTheta = 0.0f;
 
 
-    int num_obstacles = 10;
-    vector<Obstacle> obstacles = initializeObstacles(10);
 
     glm::vec3 bz;
 
@@ -693,7 +691,7 @@ int main(int argc, char* argv[])
         {
             lives -= 1;
             if (lives == 0) {
-                deadpos = camera_position_c;
+                deadpos = camera_position_c - g_move + old_move;
                 deadpos.y = deadpos.y -0.85f;
                 deadTheta = g_CameraTheta;
             } else {
@@ -903,26 +901,7 @@ void draw_bull(bool &collision, glm::vec3 &bull_pos1, glm::mat4 &model, glm::mat
                                                                1.0f));
 }
 
-vector<Obstacle> initializeObstacles(int num)
-{
-    vector<Obstacle> obstacles;
-    for (int i=0; i<num; i++)
-    {
-        Obstacle obs;
-        obs.animated = true;
-        obs.bezier_inverse = false;
-        obs.bezier_points.push_back(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-        //obs.bezier_points.push_back();
-        //obs.bezier_points.push_back();
-        //obs.bezier_points.push_back();
-        obstacles.push_back(obs);
-    }
-}
 
-bool drawObstacles(vector<Obstacle> obstacles, glm::mat4 car_model)
-{
-
-}
 
 // Função que carrega uma imagem para ser utilizada como textura
 void LoadTextureImage(const char* filename)
@@ -1674,7 +1653,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_TorsoPositionY = 0.0f;
     }
 
-    
+
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
@@ -1684,7 +1663,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_CameraTheta = 0.0f;
         g_CameraPhi = 0.0f;
         lives = max_lives;
-    }                
+    }
 
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
