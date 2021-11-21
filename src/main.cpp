@@ -403,6 +403,14 @@ int main(int argc, char* argv[])
     float sphere_time1 = 0.0f;
     int sign1 = 1;
 
+    vector<glm::vec3> sphere_pos2{glm::vec3(+60-1+10, 0, 2-10), glm::vec3(-1.5+70, 0, 15-10), glm::vec3(-10+70, 1, 10-10), glm::vec3(-5+60, 1, 5-10)};
+    float sphere_time2 = 0.0f;
+    int sign2 = 1;
+
+    vector<glm::vec3> sphere_pos3{glm::vec3(+40-1+10, 0, 2-40), glm::vec3(-1.5+40, 0, 15-40), glm::vec3(-10+40, 1, 10-40), glm::vec3(-5+40, 1, 5-40)};
+    float sphere_time3 = 0.0f;
+    int sign3 = 1;
+
     glm::vec3 bull_pos1(0.0f,-1.1f,-5.0f);
     glm::vec3 bull_pos2(0.0f,-1.1f,15.0f);
     glm::vec3 bull_pos3(5.0f,-1.1f,30.0f);
@@ -477,7 +485,7 @@ int main(int argc, char* argv[])
             camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         } else {
-            std::cout << deadpos.x << " " << deadpos.y << " " << deadpos.z << std::endl;
+            //std::cout << deadpos.x << " " << deadpos.y << " " << deadpos.z << std::endl;
             camera_position_c  = glm::vec4(x + deadpos.x, y + deadpos.y,z + deadpos.z,1.0f); // Ponto "c", centro da câmera
             camera_lookat_l    = glm::vec4(deadpos.x, deadpos.y, deadpos.z, 1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
             camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
@@ -554,6 +562,8 @@ int main(int argc, char* argv[])
         // desenha esferas
         // trocar sphere_pos, sign, sphere_time
         draw_sphere(bz,collision,delta_t, sphere_pos1,sign1,sphere_time1, model, model_sphere1, car_model);
+        draw_sphere(bz,collision,delta_t, sphere_pos2,sign2,sphere_time2, model, model_sphere1, car_model);
+        draw_sphere(bz,collision,delta_t, sphere_pos3,sign3,sphere_time3, model, model_sphere1, car_model);
 
         // Desenhamos as paredes
         model = Matrix_Translate(-10.0f,-1.1f,-40.0f)
@@ -697,7 +707,7 @@ int main(int argc, char* argv[])
                 g_CameraTheta = 0.0f;
 
             }
-            std::cout << "ENTROU" << std::endl;
+            //std::cout << "ENTROU" << std::endl;
             car_model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 0.25f,camera_position_c.z)
                         * Matrix_Rotate_X(0.0f)
                         * Matrix_Rotate_Y(g_CameraTheta + 3.1415f)
