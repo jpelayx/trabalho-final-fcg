@@ -74,6 +74,7 @@ void main()
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;
 
+    // interpolacao de GOURAUD para esfera grande
     if (object_id == SPHERE1) {
 
         // Obtemos a posição da câmera utilizando a inversa da matriz que define o
@@ -111,17 +112,7 @@ void main()
         U = texcoords.x;
         V = texcoords.y;
 
-        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-        //vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
 
-        // Equação de Iluminação
-        //float lambert = max(0,dot(n,l));
-
-        //color = Kd0 * (lambert + 0.01) + texture(TextureImage1, vec2(U,V)).rgb * (1.0 - (lambert + 0.01));
-
-        // Cor final com correção gamma, considerando monitor sRGB.
-        // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
-        //color = pow(color, vec3(1.0,1.0,1.0)/2.2);
         // Parâmetros que definem as propriedades espectrais da superfície
         vec3 Kd; // Refletância difusa
         vec3 Ks; // Refletância especular

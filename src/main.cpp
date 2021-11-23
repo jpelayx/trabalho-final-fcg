@@ -465,6 +465,7 @@ int main(int argc, char* argv[])
         //prev_time = current_time;
 
         if (lives != 0) {
+            // atualizacao da posicao baseado no delta
             // W
             if (g_W_state)
             {
@@ -476,13 +477,13 @@ int main(int argc, char* argv[])
                 g_move += +w_camera * speed * delta_t;
             }
 
-            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+            // camera livre
             camera_position_c  = glm::vec4(x_init,y_init,z_init,1.0f) + g_move; // Ponto "c", centro da câmera
             camera_view_vector = glm::vec4(-x,-y,-z,0.0f); // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         } else {
             //std::cout << deadpos.x << " " << deadpos.y << " " << deadpos.z << std::endl;
+            // look at
             camera_position_c  = glm::vec4(x + deadpos.x, y + deadpos.y,z + deadpos.z,1.0f); // Ponto "c", centro da câmera
             camera_lookat_l    = glm::vec4(deadpos.x, deadpos.y, deadpos.z, 1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
             camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
@@ -555,14 +556,12 @@ int main(int argc, char* argv[])
                             * Matrix_Scale(0.8f,0.8f,0.8f);
         }
 
-        //bool collision = drawObstacles(car_model, obstacles);
         // desenha esferas
-        // trocar sphere_pos, sign, sphere_time
         draw_sphere(bz,collision,delta_t, sphere_pos1,sign1,sphere_time1, model, model_sphere1, car_model);
         draw_sphere(bz,collision,delta_t, sphere_pos2,sign2,sphere_time2, model, model_sphere1, car_model);
         draw_sphere(bz,collision,delta_t, sphere_pos3,sign3,sphere_time3, model, model_sphere1, car_model);
 
-        // Desenhamos as paredes
+        // Desenhamos as paredes e testamos colisao
         model = Matrix_Translate(-10.0f,-1.1f,-40.0f)
               * Matrix_Scale(1.0f, 5.0f, 100.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
@@ -588,7 +587,7 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["cube"].bbox_max.z,
                                                                1.0f));
 
-        // Desenhamos as paredes
+        // Desenhamos as paredes e testamos colisao
         model = Matrix_Translate(71.0f,-1.1f,-40.0f)
               * Matrix_Scale(1.0f, 5.0f, 100.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
@@ -614,7 +613,7 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["cube"].bbox_max.z,
                                                                1.0f));
 
-        // Desenhamos as paredes
+        // Desenhamos as paredes e testamos colisao
         model = Matrix_Translate(71.0f,-1.1f,-40.0f)
               * Matrix_Scale(100.0f, 5.0f, 1.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
@@ -640,7 +639,7 @@ int main(int argc, char* argv[])
                                                                g_VirtualScene["cube"].bbox_max.z,
                                                                1.0f));
 
-        // Desenhamos as paredes
+        // Desenhamos as paredes e testamos colisao
         model = Matrix_Translate(71.0f,-1.1f,40.0f)
               * Matrix_Scale(100.0f, 5.0f, 1.0f)
               * Matrix_Rotate_Z(3.1415f/2.0f);
@@ -668,9 +667,7 @@ int main(int argc, char* argv[])
 
 
 
-        // touro
         // desenha touro
-        // trocar bull_pos1
         draw_bull(collision, bull_pos1, model, car_model);
         draw_bull(collision, bull_pos2, model, car_model);
         draw_bull(collision, bull_pos3, model, car_model);
@@ -686,7 +683,7 @@ int main(int argc, char* argv[])
         draw_bull(collision, bull_pos13, model, car_model);
 
         //std::cout << collision << std::endl;
-
+        // verifica se houve colisao com o carro
         if(collision && lives > 0)
         {
             lives -= 1;
@@ -711,7 +708,7 @@ int main(int argc, char* argv[])
                         * Matrix_Rotate_Z(0.0f)
                         * Matrix_Scale(0.10f, 0.10f, 0.10f);
         }
-
+        // desenho do carro
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(car_model));
         glUniform1i(object_id_uniform, CAR);
         DrawVirtualObject("car");
@@ -771,17 +768,16 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-
+// DESENHO DAS ESFERAS
 void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec3> &sphere_pos1, int &sign1, float &sphere_time1, glm::mat4 &model, glm::mat4 &model_sphere1, glm::mat4 &car_model){
      // Desenhamos o modelo da esfera
         bz = bezier(sphere_time1 + sign1*delta_t, 10.0, sphere_pos1[0],sphere_pos1[1],sphere_pos1[2],sphere_pos1[3]);
-        //glm::vec3 bz = bezier(prev_time + sign1*delta_t, 10.0, sphere_pos_1[0], sphere_pos_1[1],sphere_pos_1[2],sphere_pos_1[3] );
         model_sphere1 = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
 
-
+        // teste de colisao com a esfera
         collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
@@ -806,7 +802,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
               * Matrix_Rotate_X(0.2f)
               * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
 
-
+        // teste de colisao com a esfera
         collision = collision || collisionCubeSphere(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["car"].bbox_min.z,
@@ -823,7 +819,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
-
+        // teste de colisao entre esferas
         bool collision_sphere = collisionSphereSphere(model_sphere1 * glm::vec4(g_VirtualScene["sphere"].bbox_min.x,
                                                                g_VirtualScene["sphere"].bbox_min.y,
                                                                g_VirtualScene["sphere"].bbox_min.z,
@@ -840,13 +836,12 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
                                                                g_VirtualScene["sphere"].bbox_max.y,
                                                                g_VirtualScene["sphere"].bbox_max.z,
                                                                1.0f));
-
+        // verifica se eh necessario mudar a direcao da esfera
         if(sphere_time1 + sign1*delta_t < 0) {
             sign1 = 1.0f;
-            //sphere_time1 = sphere_time1 + sign1*delta_t;
 
             bz = bezier(sphere_time1, 10.0,sphere_pos1[0],sphere_pos1[1],sphere_pos1[2],sphere_pos1[3]);
-            //glm::vec3 bz = bezier(prev_time + sign1*delta_t, 10.0, sphere_pos_1[0], sphere_pos_1[1],sphere_pos_1[2],sphere_pos_1[3] );
+
             model_sphere1 = Matrix_Translate(bz.x,bz.y,bz.z)
               * Matrix_Rotate_Z(0.6f)
               * Matrix_Rotate_X(0.2f)
@@ -874,6 +869,7 @@ void draw_sphere(glm::vec3 &bz, bool &collision, float &delta_t, vector<glm::vec
         DrawVirtualObject("sphere");
 }
 
+// DESENHO DO TOURO
 void draw_bull(bool &collision, glm::vec3 &bull_pos1, glm::mat4 &model, glm::mat4 &car_model){
     model = Matrix_Translate(bull_pos1.x,bull_pos1.y,bull_pos1.z)
               * Matrix_Scale(0.01f + g_increment_size, 0.01f, 0.01f + g_increment_size)
@@ -882,7 +878,7 @@ void draw_bull(bool &collision, glm::vec3 &bull_pos1, glm::mat4 &model, glm::mat
         glUniform1i(object_id_uniform, BULL);
         DrawVirtualObject("bull");
 
-
+        // teste de colisao com o touro
         collision = collision || collisionCubeCube(car_model * glm::vec4(g_VirtualScene["car"].bbox_min.x,
                                                             g_VirtualScene["car"].bbox_min.y,
                                                                g_VirtualScene["bull"].bbox_min.z,

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-
+// COLISAO CUBO-CUBO
 bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
     for(int i = 0; i<3; i++) {
         if ((bb1min[i] < bb2min[i] &&  bb1min[i] < bb2max[i] && bb1max[i] < bb2min[i] &&  bb1max[i] < bb2max[i])
@@ -16,6 +16,7 @@ bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm
     return true;
 }
 
+// COLISAO CUBO-ESFERA
 bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax) {
     //FONTE: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
     glm::vec4 temp = (bbspheremax - bbspheremin) * 0.5f;
@@ -34,6 +35,7 @@ bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbs
     return distance <= radius;
 }
 
+// COLISAO ESFERA-ESFERA
 bool collisionSphereSphere(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
     //FONTE: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
     glm::vec4 temp1 = (bb1max - bb1min) * 0.5f;
