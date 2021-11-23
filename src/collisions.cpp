@@ -5,7 +5,6 @@
 
 using namespace std;
 
-//https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
 
 bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
     for(int i = 0; i<3; i++) {
@@ -18,6 +17,7 @@ bool collisionCubeCube(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm
 }
 
 bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbspheremin, glm::vec4 bbspheremax) {
+    //FONTE: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
     glm::vec4 temp = (bbspheremax - bbspheremin) * 0.5f;
     glm::vec4 sphereCenter = bbspheremin + temp;
 
@@ -35,6 +35,7 @@ bool collisionCubeSphere(glm::vec4 bbcubemin, glm::vec4 bbcubemax, glm::vec4 bbs
 }
 
 bool collisionSphereSphere(glm::vec4 bb1min, glm::vec4 bb1max, glm::vec4 bb2min, glm::vec4 bb2max) {
+    //FONTE: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
     glm::vec4 temp1 = (bb1max - bb1min) * 0.5f;
     glm::vec4 sphereCenter1 = bb1min + temp1;
     float radius1 = (sqrt((bb1min.x - sphereCenter1.x) * (bb1min.x-sphereCenter1.x) +
